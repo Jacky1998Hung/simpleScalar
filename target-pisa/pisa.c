@@ -570,11 +570,19 @@ md_init_decoder(void)
 #include "machine.def"
 }
 
+void
+md_print_insn_konata(md_inst_t inst,           /* instruction to disassemble */
+              md_addr_t pc,             /* addr of inst, used for PC-rels */
+              FILE *stream)
+{
+	md_print_insn(inst, pc, stream);
+}
+
 /* disassemble a SimpleScalar instruction */
 void
 md_print_insn(md_inst_t inst,		/* instruction to disassemble */
 	      md_addr_t pc,		/* addr of inst, used for PC-rels */
-	      FILE *stream)		/* output stream */
+	      FILE *stream)	      /* output stream */
 {
   enum md_opcode op;
 
@@ -676,7 +684,6 @@ md_print_insn(md_inst_t inst,		/* instruction to disassemble */
       }
     }
 }
-
 
 #if 0
 

@@ -61,8 +61,14 @@
 /* pipetrace file */
 FILE *ptrace_outfd = NULL;
 
+/* ##### konata trace file ######*/
+FILE *konata_file = NULL;
+
 /* pipetracing is active */
 int ptrace_active = FALSE;
+
+/* ##### konata tracing is active ##### */
+int konata_active = FALSE;
 
 /* pipetracing range */
 struct range_range_t ptrace_range;
@@ -76,6 +82,9 @@ ptrace_open(char *fname,		/* output filename */
 	    char *range)		/* trace range */
 {
   char *errstr;
+
+  /*###########################################*/
+  printf("############################### MY TEST #################################");
 
   /* parse the output range */
   if (!range)
@@ -105,8 +114,15 @@ ptrace_open(char *fname,		/* output filename */
   else
     {
       ptrace_outfd = fopen(fname, "w");
+      /* ##### open konata file ##### */
+      konata_file = fopen("trace_konata.txt", "w");
+      fprintf(konata_file, "Kanata 0004\n");
+
       if (!ptrace_outfd)
 	fatal("cannot open pipetrace output file `%s'", fname);
+      /* ##### check konata file ##### */
+      if (!konata_file)
+        fatal("cannot open konata trace output file `%s'", fname);
     }
 }
 
@@ -116,8 +132,13 @@ ptrace_close(void)
 {
   if (ptrace_outfd != NULL && ptrace_outfd != stderr && ptrace_outfd != stdout)
     fclose(ptrace_outfd);
+
+  /* ##### close konata trace file ##### */
+  fflush(konata_file);
+  fclose(konata_file);
 }
 
+#define PTRACE_C
 /* declare a new instruction */
 void
 __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
@@ -126,8 +147,20 @@ __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
 		 md_addr_t addr)	/* address referenced, if load/store */
 {
   myfprintf(ptrace_outfd, "+ %u 0x%08p 0x%08p ", iseq, pc, addr);
+
+  /* ##### konata add 'I' command */
+  fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+  /* ##### konata add 'L' command, this need to execute before 'md_print_insn_konata'*/
+  fprintf(konata_file, "L\t%u\t0\t%.8x:", iseq, pc);
+	
   md_print_insn(inst, addr, ptrace_outfd);
+
+  /* ##### Enter 'md_print_insn_konata' to continue produce 'L''s konata output ##### */
+  md_print_insn_konata(inst, addr, konata_file);
+
   fprintf(ptrace_outfd, "\n");
+
+  fprintf(konata_file, "\n");
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
@@ -145,6 +178,9 @@ __ptrace_newuop(unsigned int iseq,	/* instruction sequence number */
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
+
+  /* ##### konata add 'I' command */
+  fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
 }
 
 /* declare instruction retirement or squash */
@@ -155,6 +191,9 @@ __ptrace_endinst(unsigned int iseq)	/* instruction sequence number */
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
+
+  /* ##### konata add 'R' command */
+  fprintf(konata_file, "R\t%u\t0\t1\n", iseq);
 }
 
 /* declare a new cycle */
@@ -162,6 +201,9 @@ void
 __ptrace_newcycle(tick_t cycle)		/* new cycle */
 {
   fprintf(ptrace_outfd, "@ %.0f\n", (double)cycle);
+
+  /* ##### konata new cycle ##### */
+  fprintf(konata_file, "C\t1\n");
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
@@ -175,6 +217,10 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
 {
   fprintf(ptrace_outfd, "* %u %s 0x%08x\n", iseq, pstage, pevents);
 
+  fprintf(konata_file,  "S\t%u\t0\t%s\n", iseq, pstage);  
+
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
+
+
 }
