@@ -193,7 +193,7 @@ __ptrace_endinst(unsigned int iseq)	/* instruction sequence number */
     fflush(ptrace_outfd);
 
   /* ##### konata add 'R' command */
-  fprintf(konata_file, "R\t%u\t0\t1\n", iseq);
+  fprintf(konata_file, "R\t%u\t0\t0\n", iseq);
 }
 
 /* declare a new cycle */
@@ -222,5 +222,21 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
 
+  const char *event = NULL;
 
+  if (pevents & PEV_CACHEMISS) {
+        event = "i-cache-miss";
+  } else if (pevents & PEV_TLBMISS) {
+        event = "i-tlb-miss";
+  } else if (pevents & PEV_MPOCCURED) {
+        event = "mis-pred-branch-occured";
+  } else if (pevents & PEV_MPDETECT) {
+        event = "mis-pred-branch-detected";
+  } else if (pevents & PEV_AGEN) {
+        event = "address-generation";
+  }
+
+  if (event != NULL) {
+      fprintf(konata_file,  "L\t%u\t1\t%s\n", iseq, event);
+  }
 }
