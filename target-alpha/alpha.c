@@ -537,6 +537,14 @@ md_init_decoder(void)
     panic("MASK_MAX is too small, index==%d", max_offset);
 }
 
+void
+md_print_insn_konata(md_inst_t inst,           /* instruction to disassemble */
+           md_addr_t pc,             /* addr of inst, used for PC-rels */
+           FILE *stream)
+{
+     md_print_insn(inst, pc, stream);
+}
+
 /* disassemble an Alpha instruction */
 void
 md_print_insn(md_inst_t inst,		/* instruction to disassemble */

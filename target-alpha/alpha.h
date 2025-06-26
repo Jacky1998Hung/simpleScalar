@@ -580,6 +580,11 @@ word_t md_xor_regs(struct regs_t *regs);
 /* intialize the inst decoder, this function builds the ISA decode tables */
 void md_init_decoder(void);
 
+void
+md_print_insn_konata(md_inst_t inst,           /* instruction to disassemble */
+              md_addr_t pc,             /* addr of inst, used for PC-rels */
+              FILE *stream);            /* output stream */
+
 /* disassemble a SimpleScalar instruction */
 void
 md_print_insn(md_inst_t inst,		/* instruction to disassemble */
