@@ -192,8 +192,6 @@ __ptrace_endinst(unsigned int iseq)	/* instruction sequence number */
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
 
-  /* ##### konata new cycle ##### */
-  fprintf(konata_file, "C\t1\n");
   /* ##### konata add 'R' command */
   fprintf(konata_file, "R\t%u\t0\t0\n", iseq);
 }
