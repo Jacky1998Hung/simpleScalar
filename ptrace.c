@@ -202,6 +202,9 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
 {
   fprintf(ptrace_outfd, "@ %.0f\n", (double)cycle);
 
+  /* ##### konata new cycle ##### */
+  fprintf(konata_file, "C\t1\n");
+
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
 }
