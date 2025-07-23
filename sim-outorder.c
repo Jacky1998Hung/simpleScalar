@@ -3744,6 +3744,9 @@ ruu_dispatch(void)
 	  break;
 	}
 
+      /* Testing n_dispatched changing in every sim_cycle */
+      printf("Cycle:%lld n_dispatched:%d\n", sim_cycle, n_dispatched);
+
       /* get the next instruction from the IFETCH -> DISPATCH queue */
       inst = fetch_data[fetch_head].IR;
       regs.regs_PC = fetch_data[fetch_head].regs_PC;
@@ -4214,6 +4217,9 @@ ruu_fetch(void)
        && !done;
        i++)
     {
+      /* See whether fetch_num has impact to ruu_dispatch */	
+      printf("Cycle :%lld fetch_num:%d\n", sim_cycle, fetch_num); 
+      
       /* fetch an instruction at the next predicted fetch address */
       fetch_regs_PC = fetch_pred_PC;
 
@@ -4235,7 +4241,10 @@ ruu_fetch(void)
 			     NULL, ISCOMPRESS(sizeof(md_inst_t)), sim_cycle,
 			     NULL, NULL);
 	      if (lat > cache_il1_lat)
+	      {
 		last_inst_missed = TRUE;
+	        printf("Cycle:%lld I-cache misses\n", sim_cycle); 
+	      }
 	    }
 
 	  if (itlb)
@@ -4247,7 +4256,10 @@ ruu_fetch(void)
 			     NULL, ISCOMPRESS(sizeof(md_inst_t)), sim_cycle,
 			     NULL, NULL);
 	      if (tlb_lat > 1)
+	      {
 		last_inst_tmissed = TRUE;
+	        printf("I-TLB misses\n");
+	      }
 
 	      /* I-cache/I-TLB accesses occur in parallel */
 	      lat = MAX(tlb_lat, lat);

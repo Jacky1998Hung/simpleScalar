@@ -84,7 +84,7 @@ ptrace_open(char *fname,		/* output filename */
   char *errstr;
 
   /*###########################################*/
-  printf("############################### MY TEST #################################");
+  printf("############################### MY TEST #################################\n");
 
   /* parse the output range */
   if (!range)
@@ -115,7 +115,15 @@ ptrace_open(char *fname,		/* output filename */
     {
       ptrace_outfd = fopen(fname, "w");
       /* ##### open konata file ##### */
-      konata_file = fopen("trace_konata.txt", "w");
+      char konata_name[1024];
+      snprintf(konata_name, sizeof(konata_name), "%s.txt", fname);
+
+      // 開 啟 konata 檔案
+      konata_file = fopen(konata_name, "w");
+      if (!konata_file) {
+      fprintf(stderr, "無法開啟 konata trace 檔案：%s\n", konata_name);
+      exit(1);
+      }
       fprintf(konata_file, "Kanata 0004\n");
 
       if (!ptrace_outfd)
