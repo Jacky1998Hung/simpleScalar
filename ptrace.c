@@ -189,6 +189,8 @@ __ptrace_newuop(unsigned int iseq,	/* instruction sequence number */
 
   /* ##### konata add 'I' command */
   fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+  /* ##### konata add 'L' command, this need to execute before 'md_print_insn_konata'*/
+  fprintf(konata_file, "L\t%u\t0\t%.8llx:[%s]\n", iseq, pc, uop_desc);
 }
 
 /* declare instruction retirement or squash */

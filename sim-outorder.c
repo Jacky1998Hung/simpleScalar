@@ -3745,7 +3745,7 @@ ruu_dispatch(void)
 	}
 
       /* Testing n_dispatched changing in every sim_cycle */
-      printf("Cycle:%lld n_dispatched:%d\n", sim_cycle, n_dispatched);
+      printf("Cycle:%lld ptrace_swq:%d n_dispatched:%d\n", sim_cycle, ptrace_seq, n_dispatched);
 
       /* get the next instruction from the IFETCH -> DISPATCH queue */
       inst = fetch_data[fetch_head].IR;
@@ -4218,7 +4218,7 @@ ruu_fetch(void)
        i++)
     {
       /* See whether fetch_num has impact to ruu_dispatch */	
-      printf("Cycle :%lld fetch_num:%d\n", sim_cycle, fetch_num); 
+      printf("Cycle :%lld ptrace_seq:%d fetch_num:%d\n", sim_cycle, ptrace_seq, fetch_num); 
       
       /* fetch an instruction at the next predicted fetch address */
       fetch_regs_PC = fetch_pred_PC;
