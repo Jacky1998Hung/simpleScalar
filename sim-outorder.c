@@ -175,6 +175,8 @@ static char *cache_il1_opt;
 /* l1 instruction cache hit latency (in cycles) */
 static int cache_il1_lat;
 
+static int cache_il1_lat_total = 0;
+
 /* l2 instruction cache config, i.e., {<config>|dl1|dl2|none} */
 static char *cache_il2_opt;
 
@@ -4244,6 +4246,8 @@ ruu_fetch(void)
 	      {
 		last_inst_missed = TRUE;
 	        printf("Cycle:%lld I-cache misses\n", sim_cycle); 
+		cache_il1_lat_total += lat;
+		printf("Cycle :%lld lat:%d cache_il1_lat:%d cache_il1_lat_total:%d\n",sim_cycle, lat, cache_il1_lat, cache_il1_lat_total);
 	      }
 	    }
 
