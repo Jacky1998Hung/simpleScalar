@@ -4339,6 +4339,7 @@ ruu_fetch(void)
       fetch_data[fetch_tail].ptrace_seq = ptrace_seq++;
 
       /* for pipe trace */
+      //if(last_inst_missed || last_inst_tmissed) {
       ptrace_newinst(fetch_data[fetch_tail].ptrace_seq,
 		     inst, fetch_data[fetch_tail].regs_PC,
 		     0);
@@ -4346,6 +4347,7 @@ ruu_fetch(void)
 		      PST_IFETCH,
 		      ((last_inst_missed ? PEV_CACHEMISS : 0)
 		       | (last_inst_tmissed ? PEV_TLBMISS : 0)));
+      //}
       last_inst_missed = FALSE;
       last_inst_tmissed = FALSE;
 
