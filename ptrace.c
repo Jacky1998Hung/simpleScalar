@@ -242,13 +242,13 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
   /* ##### konata new cycle ##### */
   fprintf(konata_file, "C\t1\n");
 
-  rb_pushf(rb, cycle, "C\t1\n");
   if(is_event) {
+    fprintf(ring_konata, "-------------------Cycle: %.0f Start dumping-----------------\n", (double)cycle);
     rb_dump_before(rb, 3, ring_konata);
     rb_clear(rb);
-    fprintf(ring_konata, "-------------------Cycle: %.0fStart dumping-----------------\n", (double)cycle);
     is_event = 0;
   }
+  fprintf(ring_konata, "C\t1\n");
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
