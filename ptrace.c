@@ -175,7 +175,8 @@ __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
   fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
 
   /* rb_pushf */
-  rb_pushf(rb, cycle, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+  //rb_pushf(rb, cycle, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+  fprintf(ring_konata, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
 
   /* ##### konata add 'L' command, this need to execute before 'md_print_insn_konata'*/
   fprintf(konata_file, "L\t%u\t0\t%.8llx:", iseq, pc);
