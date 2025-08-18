@@ -57,12 +57,15 @@
 #include "machine.h"
 #include "range.h"
 #include "ptrace.h"
+#include "ring_buffer.h"
 
 /* pipetrace file */
 FILE *ptrace_outfd = NULL;
 
 /* ##### konata trace file ######*/
 FILE *konata_file = NULL;
+
+FILE *ring_konata = NULL;
 
 /* pipetracing is active */
 int ptrace_active = FALSE;
@@ -75,6 +78,10 @@ struct range_range_t ptrace_range;
 
 /* one-shot switch for pipetracing */
 int ptrace_oneshot = FALSE;
+
+static RingBuffer *rb = NULL;
+
+int is_event = FALSE;
 
 /* open pipeline trace */
 void
@@ -114,23 +121,27 @@ ptrace_open(char *fname,		/* output filename */
   else
     {
       ptrace_outfd = fopen(fname, "w");
-      /* ##### open konata file ##### */
-      char konata_name[1024];
-      snprintf(konata_name, sizeof(konata_name), "%s.txt", fname);
 
-      // 開 啟 konata 檔案
+      /* name konata file */
+      char konata_name[1024];
+      char ring_konata_name[1024];
+      snprintf(konata_name, sizeof(konata_name), "%s.txt", fname);
+      snprintf(ring_konata_name, sizeof(ring_konata_name), "%s.ring.txt", fname);
+      /* open konata file */
       konata_file = fopen(konata_name, "w");
-      if (!konata_file) {
-      fprintf(stderr, "無法開啟 konata trace 檔案：%s\n", konata_name);
-      exit(1);
-      }
+      ring_konata = fopen(ring_konata_name, "w");
+      if (!konata_file) 
+        fatal("cannot open pipetrace output file `%s'", fname);
+
+      /* header */
       fprintf(konata_file, "Kanata 0004\n");
+      fprintf(ring_konata, "Kanata 0004\n");
+      rb = malloc(sizeof(RingBuffer));
+      if(!rb)
+	fatal("RingBuffer is not initialized");
 
       if (!ptrace_outfd)
 	fatal("cannot open pipetrace output file `%s'", fname);
-      /* ##### check konata file ##### */
-      if (!konata_file)
-        fatal("cannot open konata trace output file `%s'", fname);
     }
 }
 
@@ -144,6 +155,9 @@ ptrace_close(void)
   /* ##### close konata trace file ##### */
   fflush(konata_file);
   fclose(konata_file);
+  fflush(ring_konata);
+  fclose(ring_konata);
+  free(rb);
 }
 
 #define PTRACE_C
@@ -152,12 +166,17 @@ void
 __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
 		 md_inst_t inst,	/* new instruction */
 		 md_addr_t pc,		/* program counter of instruction */
-		 md_addr_t addr)	/* address referenced, if load/store */
+		 md_addr_t addr,        /* address referenced, if load/store */
+		 tick_t cycle)
 {
   myfprintf(ptrace_outfd, "+ %u 0x%08p 0x%08p ", iseq, pc, addr);
 
   /* ##### konata add 'I' command */
   fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+
+  /* rb_pushf */
+  rb_pushf(rb, cycle, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+
   /* ##### konata add 'L' command, this need to execute before 'md_print_insn_konata'*/
   fprintf(konata_file, "L\t%u\t0\t%.8llx:", iseq, pc);
 	
@@ -165,6 +184,10 @@ __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
 
   /* ##### Enter 'md_print_insn_konata' to continue produce 'L''s konata output ##### */
   md_print_insn_konata(inst, addr, konata_file);
+
+  /* md_print_insn_rb */
+  char *buffer = md_print_insn_rb(inst, addr);
+  rb_pushf(rb, cycle, "L\t%u\t0\t%.8llx:%s", iseq, pc, buffer);
 
   fprintf(ptrace_outfd, "\n");
 
@@ -189,8 +212,12 @@ __ptrace_newuop(unsigned int iseq,	/* instruction sequence number */
 
   /* ##### konata add 'I' command */
   fprintf(konata_file, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
+
+  rb_pushf(rb, 0, "I\t%u\t%u\t%u\n", iseq, iseq, 0);
   /* ##### konata add 'L' command, this need to execute before 'md_print_insn_konata'*/
   fprintf(konata_file, "L\t%u\t0\t%.8llx:[%s]\n", iseq, pc, uop_desc);
+
+  rb_pushf(rb, 0, "L\t%u\t0\t%.8llx:[%s]\n", iseq, pc, uop_desc);
 }
 
 /* declare instruction retirement or squash */
@@ -215,6 +242,14 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
   /* ##### konata new cycle ##### */
   fprintf(konata_file, "C\t1\n");
 
+  rb_pushf(rb, cycle, "C\t1\n");
+  if(is_event) {
+    rb_dump_before(rb, 3, ring_konata);
+    rb_clear(rb);
+    fprintf(ring_konata, "-------------------Cycle: %.0fStart dumping-----------------\n", (double)cycle);
+    is_event = 0;
+  }
+
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
 }
@@ -227,7 +262,9 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
 {
   fprintf(ptrace_outfd, "* %u %s 0x%08x\n", iseq, pstage, pevents);
 
-  fprintf(konata_file,  "S\t%u\t0\t%s\n", iseq, pstage);  
+  fprintf(konata_file,  "S\t%u\t0\t%s\n", iseq, pstage);
+
+  rb_pushf(rb, 0, "S\t%u\t0\t%s\n", iseq, pstage);  
 
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
@@ -236,6 +273,7 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
 
   if (pevents & PEV_CACHEMISS) {
         event = "i-cache-miss";
+	is_event = 1;
   } else if (pevents & PEV_TLBMISS) {
         event = "i-tlb-miss";
   } else if (pevents & PEV_MPOCCURED) {
@@ -248,5 +286,6 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
 
   if (event != NULL) {
       fprintf(konata_file,  "L\t%u\t1\t%s\n", iseq, event);
+      rb_pushf(rb, 0, "L\t%u\t1\t%s\n", iseq, event);
   }
 }

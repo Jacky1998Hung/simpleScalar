@@ -283,7 +283,7 @@ SRCS =	main.c sim-fast.c sim-safe.c sim-cache.c sim-profile.c \
 	sim-eio.c sim-bpred.c sim-cheetah.c sim-outorder.c \
 	memory.c regs.c cache.c bpred.c ptrace.c eventq.c \
 	resource.c endian.c dlite.c symbol.c eval.c options.c range.c \
-	eio.c stats.c endian.c misc.c \
+	eio.c stats.c endian.c misc.c ring_buffer.c\
 	target-pisa/pisa.c target-pisa/loader.c target-pisa/syscall.c \
 	target-pisa/symbol.c \
 	target-alpha/alpha.c target-alpha/loader.c target-alpha/syscall.c \
@@ -392,8 +392,8 @@ sim-cheetah$(EEXT):	sysprobe$(EEXT) sim-cheetah.$(OEXT) $(OBJS) libcheetah/libch
 sim-cache$(EEXT):	sysprobe$(EEXT) sim-cache.$(OEXT) cache.$(OEXT) $(OBJS) libexo/libexo.$(LEXT)
 	$(CC) -o sim-cache$(EEXT) $(CFLAGS) sim-cache.$(OEXT) cache.$(OEXT) $(OBJS) libexo/libexo.$(LEXT) $(MLIBS)
 
-sim-outorder$(EEXT):	sysprobe$(EEXT) sim-outorder.$(OEXT) cache.$(OEXT) bpred.$(OEXT) resource.$(OEXT) ptrace.$(OEXT) $(OBJS) libexo/libexo.$(LEXT)
-	$(CC) -o sim-outorder$(EEXT) $(CFLAGS) sim-outorder.$(OEXT) cache.$(OEXT) bpred.$(OEXT) resource.$(OEXT) ptrace.$(OEXT) $(OBJS) libexo/libexo.$(LEXT) $(MLIBS)
+sim-outorder$(EEXT):	sysprobe$(EEXT) sim-outorder.$(OEXT) cache.$(OEXT) bpred.$(OEXT) resource.$(OEXT) ptrace.$(OEXT) ring_buffer.$(OEXT) $(OBJS) libexo/libexo.$(LEXT)
+	$(CC) -o sim-outorder$(EEXT) $(CFLAGS) sim-outorder.$(OEXT) cache.$(OEXT) bpred.$(OEXT) resource.$(OEXT) ptrace.$(OEXT) ring_buffer.$(OEXT) $(OBJS) libexo/libexo.$(LEXT) $(MLIBS)
 
 exo libexo/libexo.$(LEXT): sysprobe$(EEXT)
 	cd libexo $(CS) \
@@ -494,7 +494,7 @@ sim-cheetah.$(OEXT): libcheetah/libcheetah.h sim.h
 sim-outorder.$(OEXT): host.h misc.h machine.h machine.def regs.h memory.h
 sim-outorder.$(OEXT): options.h stats.h eval.h cache.h loader.h syscall.h
 sim-outorder.$(OEXT): bpred.h resource.h bitmap.h ptrace.h range.h dlite.h
-sim-outorder.$(OEXT): sim.h
+sim-outorder.$(OEXT): sim.h ring_buffer.h
 memory.$(OEXT): host.h misc.h machine.h machine.def options.h stats.h eval.h
 memory.$(OEXT): memory.h
 regs.$(OEXT): host.h misc.h machine.h machine.def loader.h regs.h memory.h
@@ -542,3 +542,4 @@ syscall.$(OEXT): syscall.h
 symbol.$(OEXT): host.h misc.h loader.h machine.h machine.def regs.h memory.h
 symbol.$(OEXT): options.h stats.h eval.h symbol.h target-alpha/ecoff.h
 symbol.$(OEXT): target-alpha/alpha.h
+ring_buffer.$(OEXT): ring_buffer.h

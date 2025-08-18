@@ -590,7 +590,10 @@ void
 md_print_insn(md_inst_t inst,		/* instruction to disassemble */
 	      md_addr_t pc,		/* addr of inst, used for PC-rels */
 	      FILE *stream);		/* output stream */
-
+/* disassemble an Alpha instruction and return the instruction string */
+char *
+md_print_insn_rb(md_inst_t inst,           /* instruction to disassemble */
+              md_addr_t pc);             /* addr of inst, used for PC-rels */
 #endif /* ALPHA_H */
 
 

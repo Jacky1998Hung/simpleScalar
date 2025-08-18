@@ -118,8 +118,8 @@ ptrace_close(void);
    : (ptrace_active = FALSE))
 
 /* main interfaces, with fast checks */
-#define ptrace_newinst(A,B,C,D)						\
-  if (ptrace_active) __ptrace_newinst((A),(B),(C),(D))
+#define ptrace_newinst(A,B,C,D,E)						\
+  if (ptrace_active) __ptrace_newinst((A),(B),(C),(D),(E))
 #define ptrace_newuop(A,B,C,D)						\
   if (ptrace_active) __ptrace_newuop((A),(B),(C),(D))
 #define ptrace_endinst(A)						\
@@ -137,8 +137,8 @@ void
 __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
 		 md_inst_t inst,	/* new instruction */
 		 md_addr_t pc,		/* program counter of instruction */
-		 md_addr_t addr);	/* address referenced, if load/store */
-
+		 md_addr_t addr,  	/* address referenced, if load/store */
+		 tick_t cycle);
 /* declare a new uop */
 void
 __ptrace_newuop(unsigned int iseq,	/* instruction sequence number */

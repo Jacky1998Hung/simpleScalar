@@ -614,3 +614,90 @@ md_print_insn(md_inst_t inst,		/* instruction to disassemble */
       }
     }
 }
+
+/* disassemble an Alpha instruction and return the instruction string */
+char *
+md_print_insn_rb(md_inst_t inst,           /* instruction to disassemble */
+              md_addr_t pc)             /* addr of inst, used for PC-rels */
+{
+  enum md_opcode op;
+  char *result;         // Pointer to hold the final instruction string
+  size_t buffer_size = 1024;  // Initial buffer size for the string
+  char buffer[buffer_size];    // Temporary buffer for formatting the instruction
+
+  /* Decode the instruction, assumes pre-decoded text segment */
+  MD_SET_OPCODE(op, inst);
+
+  // Allocate memory for result string
+  result = malloc(buffer_size * sizeof(char));
+  if (result == NULL) {
+    perror("malloc failed");
+    return NULL;  // Return NULL if allocation fails
+  }
+
+  /* Start with the instruction name */
+  if (op <= OP_NA || op >= OP_MAX) {
+    /* Invalid instruction */
+    snprintf(buffer, sizeof(buffer), "<invalid inst: 0x%08x>", inst);
+    strcpy(result, buffer);
+  }
+  else {
+    char *s;
+
+    // Format the instruction name
+    snprintf(buffer, sizeof(buffer), "%s ", MD_OP_NAME(op));
+    strcpy(result, buffer);  // Copy the instruction name into the result
+
+    s = MD_OP_FORMAT(op);
+    while (*s) {
+      switch (*s) {
+      case 'a':
+        snprintf(buffer, sizeof(buffer), "r%d", RA);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'b':
+        snprintf(buffer, sizeof(buffer), "r%d", RB);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'c':
+        snprintf(buffer, sizeof(buffer), "r%d", RC);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'A':
+        snprintf(buffer, sizeof(buffer), "f%d", RA);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'B':
+        snprintf(buffer, sizeof(buffer), "f%d", RB);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'C':
+        snprintf(buffer, sizeof(buffer), "f%d", RC);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'o':
+        snprintf(buffer, sizeof(buffer), "%d", (sword_t)SEXT(OFS));
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'j':
+        snprintf(buffer, sizeof(buffer), "0x%lld", pc + (SEXT(OFS) << 2) + 4);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'J':
+        snprintf(buffer, sizeof(buffer), "0x%lld", pc + (SEXT21(TARG) << 2) + 4);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      case 'i':
+        snprintf(buffer, sizeof(buffer), "%d", (word_t)IMM);
+        strcat(result, buffer);  // Append to the result string
+        break;
+      default:
+        snprintf(buffer, sizeof(buffer), "%c", *s);
+        strcat(result, buffer);  // Append to the result string
+      }
+      s++;
+    }
+  }
+
+  return result;  // Return the formatted instruction string
+}
