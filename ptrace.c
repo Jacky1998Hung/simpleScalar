@@ -232,6 +232,7 @@ __ptrace_endinst(unsigned int iseq)	/* instruction sequence number */
 
   /* ##### konata add 'R' command */
   fprintf(konata_file, "R\t%u\t0\t0\n", iseq);
+  rb_pushf(rb, 0,  "R\t%u\t0\t0\n", iseq);
 }
 
 /* declare a new cycle */
