@@ -245,7 +245,7 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
 
   if(is_event) {
     //fprintf(ring_konata, "-------------------Cycle: %.0f Start dumping-----------------\n", (double)cycle);
-    rb_dump_before(rb, 20, ring_konata);
+    rb_dump_before(rb, 128, ring_konata);
     rb_clear(rb);
     is_event = 0;
   }
