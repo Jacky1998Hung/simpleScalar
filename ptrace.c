@@ -243,7 +243,7 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
   fprintf(konata_file, "C\t1\n");
 
   if(is_event) {
-    fprintf(ring_konata, "-------------------Cycle: %.0f Start dumping-----------------\n", (double)cycle);
+    //fprintf(ring_konata, "-------------------Cycle: %.0f Start dumping-----------------\n", (double)cycle);
     rb_dump_before(rb, 3, ring_konata);
     rb_clear(rb);
     is_event = 0;
