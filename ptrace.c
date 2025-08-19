@@ -250,7 +250,7 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
 /*	  
     fprintf(ring_konata, "-------------------Cycle: %.0f Event name:%s-----------------\n", (double)cycle, event_name);
   */  
-    rb_dump_before(rb, 1024, ring_konata);
+    rb_dump_before(rb, 128, ring_konata);
     rb_clear(rb);
     is_event = 0;
   }

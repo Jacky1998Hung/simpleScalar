@@ -12,7 +12,7 @@ extern "C" {
  *   gcc -DRING_BUFFER_SIZE=256 ...
  */
 #ifndef RING_BUFFER_SIZE
-#define RING_BUFFER_SIZE 1024
+#define RING_BUFFER_SIZE 128
 #endif
 
 #ifndef RING_BUFFER_ENTRY_BYTES
