@@ -1,0 +1,68 @@
+Kanata 0004
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+C	1
+I	0	0	0
+L	0	0	1200057f0:lda r30,-16(r30)
+S	0	0	IF
+L	0	1	i-cache-miss
+I	1	1	0
+L	1	0	1200057f4:stq r31,8(r30)
+I	2	2	0
+L	2	0	1200057f8:br r1,0x4
+C	1
+S	0	0	DA
+I	3	3	0
+L	3	0	1200057f4:[internal ld/st]
+S	3	0	DA
+S	1	0	DA
+S	2	0	DA
+L	2	1	mis-pred-branch-occured
+C	1
+S	2	0	EX
+S	0	0	EX
+C	1
+S	0	0	WB
+S	2	0	WB
+S	1	0	EX
+L	1	1	address-generation
+C	1
+S	0	0	CT
+R	0	0	0
+S	1	0	WB
+S	3	0	WB
+I	4	4	0
+L	4	0	1200057fc:ldl r16,16(r30)
+C	1
+S	3	0	CT
+L	3	1	i-cache-miss
