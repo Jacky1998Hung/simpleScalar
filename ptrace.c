@@ -83,6 +83,8 @@ static RingBuffer *rb = NULL;
 
 int is_event = FALSE;
 
+char *event_name = NULL;
+
 /* open pipeline trace */
 void
 ptrace_open(char *fname,		/* output filename */
@@ -188,8 +190,7 @@ __ptrace_newinst(unsigned int iseq,	/* instruction sequence number */
 
   /* md_print_insn_rb */
   char *buffer = md_print_insn_rb(inst, addr);
-  rb_pushf(rb, cycle, "L\t%u\t0\t%.8llx:%s", iseq, pc, buffer);
-
+  rb_pushf(rb, cycle, "L\t%u\t0\t%.8llx:%s Cycle: %.0f\n", iseq, pc, buffer, (double)cycle);
   fprintf(ptrace_outfd, "\n");
 
   fprintf(konata_file, "\n");
@@ -244,9 +245,12 @@ __ptrace_newcycle(tick_t cycle)		/* new cycle */
   /* ##### konata new cycle ##### */
   fprintf(konata_file, "C\t1\n");
   rb_pushf(rb, cycle,  "C\t1\n");
+  
   if(is_event) {
-    //fprintf(ring_konata, "-------------------Cycle: %.0f Start dumping-----------------\n", (double)cycle);
-    rb_dump_before(rb, 128, ring_konata);
+	  /*
+    fprintf(ring_konata, "-------------------Cycle: %.0f Event name:%s-----------------\n", (double)cycle, event_name);
+    */
+    rb_dump_before(rb, 1024, ring_konata);
     rb_clear(rb);
     is_event = 0;
   }
@@ -275,6 +279,7 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
   if (pevents & PEV_CACHEMISS) {
         event = "i-cache-miss";
 	is_event = 1;
+	event_name = event;
   } else if (pevents & PEV_TLBMISS) {
         event = "i-tlb-miss";
   } else if (pevents & PEV_MPOCCURED) {
