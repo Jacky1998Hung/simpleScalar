@@ -2274,6 +2274,7 @@ ruu_commit(void)
 	    panic ("retired instruction has odeps\n");
         }
     }
+  if(committed == 1) printf("cycle : %lld, committed == 1\n", sim_cycle);
 }
 
 
@@ -2328,7 +2329,7 @@ ruu_recover(int branch_index)			/* index of mis-pred branch */
 
 	  /* indicate in pipetrace that this instruction was squashed */
 	  ptrace_endinst(LSQ[LSQ_index].ptrace_seq);
-
+	  printf("cycle:%lld, indicate in pipetrace that this instruction was squashed\n", sim_cycle);
 	  /* go to next earlier LSQ slot */
 	  LSQ_prev_tail = LSQ_index;
 	  LSQ_index = (LSQ_index + (LSQ_size-1)) % LSQ_size;
