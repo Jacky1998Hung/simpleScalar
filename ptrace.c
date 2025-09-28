@@ -140,10 +140,11 @@ ptrace_open(char *fname,		/* output filename */
       /* header */
       fprintf(konata_file, "Kanata 0004\n");
       fprintf(ring_konata, "Kanata 0004\n");
-      rb = malloc(sizeof(RingBuffer));
+/*      rb = malloc(sizeof(RingBuffer));
       if(!rb)
 	fatal("RingBuffer is not initialized");
-
+*/
+      rb_init(rb);
       if (!ptrace_outfd)
 	fatal("cannot open pipetrace output file `%s'", fname);
     }
@@ -161,7 +162,6 @@ ptrace_close(void)
   fclose(konata_file);
   fflush(ring_konata);
   fclose(ring_konata);
-  free(rb);
 }
 
 #define PTRACE_C
