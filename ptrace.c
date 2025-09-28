@@ -79,8 +79,8 @@ struct range_range_t ptrace_range;
 /* one-shot switch for pipetracing */
 int ptrace_oneshot = FALSE;
 
-static RingBuffer *rb = NULL;
-
+static RingBuffer rb_storage;
+static RingBuffer *rb = &rb_storage;
 int is_event = FALSE;
 
 char *event_name = NULL;
@@ -133,6 +133,8 @@ ptrace_open(char *fname,		/* output filename */
       konata_file = fopen(konata_name, "w");
       ring_konata = fopen(ring_konata_name, "w");
       if (!konata_file) 
+        fatal("cannot open pipetrace output file `%s'", fname);
+      if (!ring_konata) 
         fatal("cannot open pipetrace output file `%s'", fname);
 
       /* header */
@@ -274,7 +276,7 @@ __ptrace_newstage(unsigned int iseq,	/* instruction sequence number */
   if (ptrace_outfd == stderr || ptrace_outfd == stdout)
     fflush(ptrace_outfd);
 
-  const char *event = NULL;
+  char *event = NULL;
 
   if (pevents & PEV_CACHEMISS) {
         event = "i-cache-miss";

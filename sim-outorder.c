@@ -2184,6 +2184,9 @@ ruu_commit(void)
 		  /* schedule functional unit release event */
 		  fu->master->busy = fu->issuelat;
 
+		  printf("MD_OP_FUCLASS(LSQ[LSQ_head].op) has 0x%b\n", MD_OP_FUCLASS(LSQ[LSQ_head].op));
+		   printf("F_MEM 0x%x, F_STORE 0x%x\n", F_MEM, F_STORE);
+
 		  /* go to the data cache */
 		  if (cache_dl1)
 		    {
@@ -2274,7 +2277,7 @@ ruu_commit(void)
 	    panic ("retired instruction has odeps\n");
         }
     }
-  if(committed == 1) printf("cycle : %lld, committed == 1\n", sim_cycle);
+  if(committed == 1) printf("cycle : %lld, committed == 1, total number of integer multiplier/dividers available:%d\n", sim_cycle, res_imult);
 }
 
 
@@ -2329,7 +2332,7 @@ ruu_recover(int branch_index)			/* index of mis-pred branch */
 
 	  /* indicate in pipetrace that this instruction was squashed */
 	  ptrace_endinst(LSQ[LSQ_index].ptrace_seq);
-	  printf("cycle:%lld, indicate in pipetrace that this instruction was squashed\n", sim_cycle);
+	  printf("cycle:%lld, ptrace_seq: %d, indicate in pipetrace that this instruction was squashed\n", sim_cycle, LSQ[LSQ_index].ptrace_seq);
 	  /* go to next earlier LSQ slot */
 	  LSQ_prev_tail = LSQ_index;
 	  LSQ_index = (LSQ_index + (LSQ_size-1)) % LSQ_size;
